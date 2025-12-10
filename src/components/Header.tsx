@@ -33,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({ selectedYear }) => {
           color: "var(--text-secondary)",
         }}
       >
-        한 해를 돌아보고, 새로운 시작을 계획하세요!
+        한 해를 돌아보고, 새로운 시작을 계획하세요
       </p>
     </header>
   );

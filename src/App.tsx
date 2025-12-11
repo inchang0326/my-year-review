@@ -7,7 +7,6 @@ import { useLocalStorage } from "./hooks/useLocalStorage";
 import type { ReviewItem, ReviewCategory, YearReview, Theme } from "./types";
 import { CURRENT_YEAR, STORAGE_KEYS } from "./utils/constants";
 import "./styles/globals.css";
-import "./App.css";
 
 export const App: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState<number>(CURRENT_YEAR);

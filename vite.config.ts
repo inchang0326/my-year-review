@@ -11,7 +11,7 @@ export default defineConfig({
         // manifest 외 정적 자산을 캐시에 포함
         "favicon.ico", // 브라우저 탭/북마크 아이콘 (public/favicon.ico)
         "robots.txt", // 크롤러 규칙 파일 (public/robots.txt)
-        "budget-app-apple-touch-icon.png", // iOS 홈 화면 아이콘 (public/budget-app-apple-touch-icon.png)
+        "icon-192.png", // iOS 홈 화면 아이콘 (public/budget-app-apple-touch-icon.png)
       ],
       manifest: {
         // 웹 앱 매니페스트 (설치 메타 정보)
@@ -43,9 +43,11 @@ export default defineConfig({
         cleanupOutdatedCaches: true, // 예전 캐시 정리
         // Workbox 설정(런타임 캐싱 전략 + SPA 라우팅 처리)
         navigateFallback: "/index.html", // 브라우저가 직접 라우트로 접근(새로고침/딥링크) 시 index.html 반환 → SPA 404 방지
+        navigationPreload: false,
       },
       // 개발 서버에서도 SW를 강제로 켜고 싶다면 true
       // 단, HMR/캐시 혼동이 잦아 일반적으로 배포 빌드/프리뷰에서 검증 권장
+      injectRegister: null,
       devOptions: {
         enabled: false,
       },

@@ -151,3 +151,13 @@
     transform: translateY(0);
   }
 }
+
+.toast__action--secondary {
+  background: var(--toast-bg);
+  color: var(--toast-fg);
+  opacity: 0.8;
+}
+
+.toast__action--secondary:hover {
+  opacity: 1;
+}

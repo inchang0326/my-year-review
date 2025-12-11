@@ -1,21 +1,34 @@
-import { useRegisterSW } from "virtual:pwa-register/react"; // 플러그인 제공 Servie Worker 등록 Hook
-import { useState } from "react";
+import { useRegisterSW } from "virtual:pwa-register/react";
+import { useState, useEffect } from "react";
 
 export const usePWA = () => {
-  const [needRefresh, setNeedRefresh] = useState(false); // 새 버전 감지 시(코드 수정된 후 재 배포 시 - npm run build) true
+  const [needRefresh, setNeedRefresh] = useState(false);
 
-  console.log(needRefresh);
   const { updateServiceWorker } = useRegisterSW({
     onNeedRefresh() {
-      // 새 SW가 설치됐고 대기 중일 때 호출
+      console.log("🔔 새로운 버전 감지");
       setNeedRefresh(true);
     },
+    onOfflineReady() {
+      console.log("✅ 오프라인 준비 완료");
+    },
+    // 즉시 등록하지 않고 지연 등록
+    immediate: false,
   });
 
-  const confirmUpdate = () => {
-    // true 전달 시 대기 중인 Service Worker를 즉시 활성화하고 페이지를 리로드
-    updateServiceWorker(true);
+  const confirmUpdate = async () => {
+    console.log("🔄 업데이트 시작");
+    setNeedRefresh(false);
+    // 새 SW를 활성화하고 페이지 리로드
+    await updateServiceWorker(true);
   };
 
-  return { needRefresh, confirmUpdate };
+  const dismissUpdate = () => {
+    console.log("❌ 업데이트 거부");
+    setNeedRefresh(false);
+  };
+
+  console.log("needRefresh 상태:", needRefresh);
+
+  return { needRefresh, confirmUpdate, dismissUpdate };
 };

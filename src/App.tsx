@@ -11,7 +11,7 @@ import "./styles/globals.css";
 import "./App.css";
 
 export const App: React.FC = () => {
-  const { needRefresh, confirmUpdate } = usePWA();
+  const { needRefresh, confirmUpdate, dismissUpdate } = usePWA();
   const [selectedYear, setSelectedYear] = useState<number>(CURRENT_YEAR);
   const [reviews, setReviews] = useLocalStorage<YearReview[]>(
     STORAGE_KEYS.REVIEWS,
@@ -93,10 +93,20 @@ export const App: React.FC = () => {
 
       {needRefresh && (
         <div className="toast">
-          <span className="toast__message">새 버전이 있습니다.</span>
-          <button className="toast__action" onClick={confirmUpdate}>
-            업데이트
-          </button>
+          <span className="toast__message">
+            새 버전이 있습니다. 업데이트하시겠습니까?
+          </span>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button className="toast__action" onClick={confirmUpdate}>
+              업데이트
+            </button>
+            <button
+              className="toast__action toast__action--secondary"
+              onClick={dismissUpdate}
+            >
+              나중에
+            </button>
+          </div>
         </div>
       )}
     </div>

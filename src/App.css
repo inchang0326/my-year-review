@@ -43,15 +43,15 @@
   }
 }
 
-/* 토스트 컨테이너 하나만 쓴다는 전제의 기본 배치 */
+/* 토스트 컨테이너 */
 .toast {
   position: fixed;
   bottom: 16px;
   right: 16px;
   z-index: 9999;
 
-  display: inline-flex;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
   gap: var(--toast-spacing);
 
   max-width: min(92vw, 480px);
@@ -64,6 +64,7 @@
 
   line-height: 1.4;
   font-size: 14px;
+  box-sizing: border-box;
 
   /* 입장 애니메이션 */
   opacity: 0;
@@ -71,19 +72,18 @@
   animation: toast-in 220ms ease-out forwards;
 }
 
-/* 모바일처럼 좁은 화면에서는 중앙 하단으로 */
+/* 모바일에서는 중앙 하단으로 */
 @media (max-width: 480px) {
   .toast {
     left: 12px;
     right: 12px;
     bottom: 12px;
     max-width: unset;
-    justify-content: space-between;
-    text-align: left;
+    width: calc(100vw - 24px);
   }
 }
 
-/* 상태별 변형: 필요 시 className="toast toast--success" 형태로 사용 */
+/* 상태별 변형 */
 .toast--success {
   background: var(--toast-success-bg);
   color: var(--toast-success-fg);
@@ -104,7 +104,7 @@
   color: var(--toast-warn-fg);
 }
 
-/* 아이콘/액션이 있을 때의 보조 요소 */
+/* 아이콘 */
 .toast__icon {
   flex: 0 0 auto;
   width: 18px;
@@ -112,25 +112,67 @@
   opacity: 0.9;
 }
 
+/* 메시지 */
 .toast__message {
   flex: 1 1 auto;
   min-width: 0;
   overflow-wrap: anywhere;
   text-align: left;
+  margin-bottom: 0;
 }
 
+/* 버튼 컨테이너 */
+.toast__actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* 액션 버튼 */
 .toast__action {
-  flex: 0 0 auto;
-  margin-left: 4px;
-  padding: 6px 10px;
+  flex: 1;
+  padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid currentColor;
   background: transparent;
   color: inherit;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: opacity 0.2s, background-color 0.2s;
+  white-space: nowrap;
+  text-align: center;
 }
 
-/* 모션 민감 사용자 배려: 움직임 최소화 */
+.toast__action:hover {
+  opacity: 0.8;
+}
+
+.toast__action:active {
+  opacity: 0.6;
+}
+
+/* 주요 액션 버튼 */
+.toast__action--primary {
+  background: currentColor;
+  color: var(--toast-bg);
+  border-color: currentColor;
+}
+
+/* 보조 액션 버튼 */
+.toast__action--secondary {
+  background: transparent;
+  color: var(--toast-fg);
+  opacity: 0.7;
+  border-color: currentColor;
+}
+
+.toast__action--secondary:hover {
+  opacity: 1;
+}
+
+/* 모션 민감 사용자 배려 */
 @media (prefers-reduced-motion: reduce) {
   .toast {
     animation: none;
@@ -150,14 +192,4 @@
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-.toast__action--secondary {
-  background: var(--toast-bg);
-  color: var(--toast-fg);
-  opacity: 0.8;
-}
-
-.toast__action--secondary:hover {
-  opacity: 1;
 }

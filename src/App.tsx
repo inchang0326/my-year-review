@@ -96,8 +96,11 @@ export const App: React.FC = () => {
           <span className="toast__message">
             새 버전이 있습니다. 업데이트하시겠습니까?
           </span>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <button className="toast__action" onClick={confirmUpdate}>
+          <div className="toast__actions">
+            <button
+              className="toast__action toast__action--primary"
+              onClick={confirmUpdate}
+            >
               업데이트
             </button>
             <button

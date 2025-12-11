@@ -1,34 +1,59 @@
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 
 export const usePWA = () => {
   const [needRefresh, setNeedRefresh] = useState(false);
+  const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
 
   const { updateServiceWorker } = useRegisterSW({
+    onRegistered(reg) {
+      console.log("✅ SW Registered:", reg);
+      registrationRef.current = reg;
+
+      // 대기 중인 SW가 있으면 업데이트 알림
+      if (reg.waiting) {
+        console.log("🔔 업데이트 대기 중");
+        setNeedRefresh(true);
+      }
+
+      // 새로운 SW가 설치되면 감지
+      reg.addEventListener("updatefound", () => {
+        const newWorker = reg.installing;
+        newWorker?.addEventListener("statechange", () => {
+          if (
+            newWorker.state === "installed" &&
+            navigator.serviceWorker.controller
+          ) {
+            console.log("🔔 새로운 버전 감지");
+            setNeedRefresh(true);
+          }
+        });
+      });
+    },
     onNeedRefresh() {
-      //   console.log("🔔 새로운 버전 감지");
+      console.log("🔔 새로운 버전 감지");
       setNeedRefresh(true);
     },
-    onOfflineReady() {
-      //   console.log("✅ 오프라인 준비 완료");
-    },
-    // 즉시 등록하지 않고 지연 등록
-    immediate: false,
   });
 
-  const confirmUpdate = async () => {
-    // console.log("🔄 업데이트 시작");
+  const confirmUpdate = () => {
+    console.log("🔄 업데이트 시작");
     setNeedRefresh(false);
-    // 새 SW를 활성화하고 페이지 리로드
-    await updateServiceWorker(true);
+    updateServiceWorker(true);
   };
 
   const dismissUpdate = () => {
-    // console.log("❌ 업데이트 거부");
+    console.log("❌ 업데이트 거부 - 대기 중인 SW 비활성화");
     setNeedRefresh(false);
-  };
 
-  //   console.log("needRefresh 상태:", needRefresh);
+    // 대기 중인 SW에 메시지 전송
+    if (registrationRef.current?.waiting) {
+      registrationRef.current.waiting.postMessage({
+        type: "SKIP_WAITING",
+      });
+      console.log("📤 SKIP_WAITING 메시지 전송");
+    }
+  };
 
   return { needRefresh, confirmUpdate, dismissUpdate };
 };

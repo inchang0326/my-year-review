@@ -25,7 +25,7 @@ export const Header: React.FC<HeaderProps> = ({ selectedYear }) => {
           backgroundClip: "text",
         }}
       >
-        {selectedYear}년 회고
+        {selectedYear}년 회고!
       </h1>
       <p
         style={{

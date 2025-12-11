@@ -6,7 +6,13 @@ export const usePWA = () => {
   const registrationRef = useRef<ServiceWorkerRegistration | null>(null);
 
   const { updateServiceWorker } = useRegisterSW({
-    onRegistered(reg) {
+    onRegistered(reg: ServiceWorkerRegistration | undefined) {
+      // undefined 체크
+      if (!reg) {
+        console.error("❌ SW Registration failed");
+        return;
+      }
+
       console.log("✅ SW Registered:", reg);
       registrationRef.current = reg;
 

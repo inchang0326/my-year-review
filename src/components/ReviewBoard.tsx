@@ -19,11 +19,13 @@ export const ReviewBoard: React.FC<ReviewBoardProps> = ({
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))",
         gap: "1.5rem",
-        padding: "2rem",
+        padding: "1.5rem",
         maxWidth: "1400px",
         margin: "0 auto",
+        width: "100%",
+        boxSizing: "border-box",
       }}
     >
       {categories.map((category) => (

@@ -6,8 +6,12 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: "prompt",
-      includeAssets: ["favicon.ico", "robots.txt", "icon-192.png"],
+      registerType: "autoUpdate",
+      includeAssets: [
+        "favicon.ico",
+        "robots.txt",
+        "budget-app-apple-touch-icon.png",
+      ],
       manifest: {
         name: "Year-End Review Board",
         short_name: "Review Board",
@@ -32,14 +36,11 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // 핵심: 사용자 승인 전까지 새 SW가 활성화되지 않도록 설정
-        skipWaiting: false,
-        clientsClaim: false,
+        skipWaiting: true,
+        clientsClaim: true,
         cleanupOutdatedCaches: true,
         navigateFallback: "/index.html",
       },
-      // 명시적 등록으로 자동 활성화 방지
-      injectRegister: "script",
       devOptions: {
         enabled: false,
       },

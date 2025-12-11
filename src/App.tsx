@@ -6,12 +6,10 @@ import { ThemeToggle } from "./components/ThemeToggle";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import type { ReviewItem, ReviewCategory, YearReview, Theme } from "./types";
 import { CURRENT_YEAR, STORAGE_KEYS } from "./utils/constants";
-import { usePWA } from "./hooks/usePWA";
 import "./styles/globals.css";
 import "./App.css";
 
 export const App: React.FC = () => {
-  const { needRefresh, confirmUpdate, dismissUpdate } = usePWA();
   const [selectedYear, setSelectedYear] = useState<number>(CURRENT_YEAR);
   const [reviews, setReviews] = useLocalStorage<YearReview[]>(
     STORAGE_KEYS.REVIEWS,
@@ -80,6 +78,7 @@ export const App: React.FC = () => {
       >
         <ThemeToggle theme={theme} onToggle={handleToggleTheme} />
       </div>
+
       <Header selectedYear={selectedYear} />
       <YearSelector
         selectedYear={selectedYear}
@@ -90,28 +89,6 @@ export const App: React.FC = () => {
         onAddItem={handleAddItem}
         onDeleteItem={handleDeleteItem}
       />
-
-      {needRefresh && (
-        <div className="toast">
-          <span className="toast__message">
-            새 버전이 있습니다. 업데이트하시겠습니까?
-          </span>
-          <div className="toast__actions">
-            <button
-              className="toast__action toast__action--primary"
-              onClick={confirmUpdate}
-            >
-              업데이트
-            </button>
-            <button
-              className="toast__action toast__action--secondary"
-              onClick={dismissUpdate}
-            >
-              나중에
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

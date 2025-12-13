@@ -41,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div style={{ minWidth: 0, textAlign: "center" }}>
           <h1
             style={{
-              fontSize: "2.5rem",
+              fontSize: "2rem",
               fontWeight: "700",
               marginBottom: "0.5rem",
               background:
@@ -53,14 +53,6 @@ export const Header: React.FC<HeaderProps> = ({
           >
             {selectedYear}년 회고
           </h1>
-          <p
-            style={{
-              fontSize: "1rem",
-              color: "var(--text-secondary)",
-            }}
-          >
-            한 해를 돌아보고, 새로운 시작을 계획하세요!
-          </p>
         </div>
 
         {/* 오른쪽 버튼들 */}

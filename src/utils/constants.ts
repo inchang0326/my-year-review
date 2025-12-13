@@ -14,7 +14,7 @@ export const CATEGORY_CONFIG = {
     emoji: "🚀",
   },
   stop: {
-    title: "멈플 것",
+    title: "멈출 것",
     description: "그만두거나 줄이고 싶은 습관, 활동",
     color: "rose",
     emoji: "🛑",

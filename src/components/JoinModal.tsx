@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 interface JoinModalProps {
   isOpen: boolean;
-  onJoin: (inviteCode: string, userName: string) => Promise<boolean>;
+  onJoin: (inviteCode: string) => Promise<boolean>;
   onClose: () => void;
 }
 
@@ -12,7 +12,6 @@ export const JoinModal: React.FC<JoinModalProps> = ({
   onClose,
 }) => {
   const [inviteCode, setInviteCode] = useState("");
-  const [userName, setUserName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,19 +23,13 @@ export const JoinModal: React.FC<JoinModalProps> = ({
       return;
     }
 
-    if (!userName.trim()) {
-      setError("이름을 입력해주세요");
-      return;
-    }
-
     setIsLoading(true);
     setError(null);
 
     try {
-      const success = await onJoin(inviteCode.toUpperCase(), userName);
+      const success = await onJoin(inviteCode.toUpperCase());
       if (success) {
         setInviteCode("");
-        setUserName("");
         onClose();
       }
     } catch {
@@ -124,23 +117,6 @@ export const JoinModal: React.FC<JoinModalProps> = ({
           >
             닉네임
           </label>
-          <input
-            type="text"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-            placeholder="당신의 이름"
-            disabled={isLoading}
-            style={{
-              width: "100%",
-              padding: "0.75rem",
-              borderRadius: "0.5rem",
-              border: "1px solid var(--border-color)",
-              backgroundColor: "var(--bg-secondary)",
-              color: "var(--text-primary)",
-              fontSize: "1rem",
-              boxSizing: "border-box",
-            }}
-          />
         </div>
 
         {error && (

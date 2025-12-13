@@ -119,16 +119,10 @@ export const App: React.FC = () => {
   };
 
   // ✅ 버그 수정: 협업모드 참여 시 JoinModal에서 입력한 닉네임을 사용
-  const handleJoin = async (
-    code: string,
-    nicknameFromModal: string
-  ): Promise<boolean> => {
+  const handleJoin = async (code: string): Promise<boolean> => {
     clearError();
 
-    const v = nicknameFromModal.trim() || "익명";
-
-    // 설정 드로어/작성자명도 즉시 일치
-    setNickname(v);
+    const v = nickname.trim();
 
     const ok = await joinSession(code, v);
     if (ok) {
@@ -272,7 +266,6 @@ export const App: React.FC = () => {
         nickname={nickname}
         onConfirmNickname={handleConfirmNickname}
         isCollabActive={isCollabActive}
-        sessionId={session?.id}
         onSelectSoloMode={handleSelectSoloMode}
         onCreateCollab={handleCreateCollab}
         onOpenJoin={handleOpenJoin}

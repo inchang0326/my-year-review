@@ -169,7 +169,7 @@ export const useFirebase = () => {
       }
 
       const code = inviteCode.trim().toUpperCase();
-      const name = nickname.trim() || "익명";
+      const name = nickname.trim();
 
       try {
         const sessionRef = ref(database, `sessions/${code}`);

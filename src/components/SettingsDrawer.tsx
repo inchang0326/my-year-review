@@ -26,7 +26,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   nickname,
   onConfirmNickname,
   isCollabActive,
-  sessionId,
   onSelectSoloMode,
   onCreateCollab,
   onOpenJoin,
@@ -235,18 +234,6 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
               </>
             )}
           </div>
-
-          {isCollabActive && sessionId && (
-            <div
-              style={{
-                marginTop: "10px",
-                fontSize: "12px",
-                color: "var(--text-secondary)",
-              }}
-            >
-              {sessionId}
-            </div>
-          )}
         </div>
 
         {/* 메뉴(띄어쓰기 없이 + 만들기/참여 분리) */}
@@ -256,7 +243,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
           {!isCollabActive && (
             <>
               <MenuButton onClick={onCreateCollab}>협업모드 만들기</MenuButton>
-              <MenuButton onClick={onOpenJoin}>협업모드 참여</MenuButton>
+              <MenuButton onClick={onOpenJoin}>협업모드 참여하기</MenuButton>
             </>
           )}
 

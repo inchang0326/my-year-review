@@ -144,15 +144,27 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
             backgroundColor: "var(--bg-secondary)",
           }}
         >
-          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: isEditing
+                ? "minmax(0, 1fr) auto auto" // input + 확인 + 취소
+                : "minmax(0, 1fr) auto", // input + 수정
+              columnGap: "8px",
+              rowGap: "8px",
+              alignItems: "center",
+              minWidth: 0,
+            }}
+          >
             <input
               value={isEditing ? draft : displayName}
               readOnly={!isEditing}
               onChange={(e) => setDraft(e.target.value)}
               placeholder="닉네임"
               style={{
-                flex: 1,
-                padding: "12px",
+                minWidth: 0, // 좁은 화면에서 먼저 줄어들도록
+                width: "100%",
+                padding: "10px 12px",
                 borderRadius: "12px",
                 border: "1px solid var(--border-color)",
                 backgroundColor: isEditing ? "var(--bg-card)" : "rgba(0,0,0,0)",
@@ -169,7 +181,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                 onClick={startEdit}
                 disabled={busy}
                 style={{
-                  padding: "12px",
+                  padding: "10px 12px",
                   borderRadius: "12px",
                   border: "none",
                   backgroundColor: "var(--indigo)",
@@ -183,13 +195,13 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                 수정
               </button>
             ) : (
-              <div style={{ display: "flex", gap: "8px" }}>
+              <>
                 <button
                   type="button"
                   onClick={confirm}
                   disabled={busy}
                   style={{
-                    padding: "12px",
+                    padding: "10px 12px",
                     borderRadius: "12px",
                     border: "none",
                     backgroundColor: "var(--indigo)",
@@ -207,7 +219,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                   onClick={cancelEdit}
                   disabled={busy}
                   style={{
-                    padding: "12px",
+                    padding: "10px 12px",
                     borderRadius: "12px",
                     border: "1px solid var(--border-color)",
                     backgroundColor: "transparent",
@@ -220,9 +232,21 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
                 >
                   취소
                 </button>
-              </div>
+              </>
             )}
           </div>
+
+          {isCollabActive && sessionId && (
+            <div
+              style={{
+                marginTop: "10px",
+                fontSize: "12px",
+                color: "var(--text-secondary)",
+              }}
+            >
+              {sessionId}
+            </div>
+          )}
         </div>
 
         {/* 메뉴(띄어쓰기 없이 + 만들기/참여 분리) */}
@@ -232,7 +256,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
           {!isCollabActive && (
             <>
               <MenuButton onClick={onCreateCollab}>협업모드 만들기</MenuButton>
-              <MenuButton onClick={onOpenJoin}>협업모드 참여하기</MenuButton>
+              <MenuButton onClick={onOpenJoin}>협업모드 참여</MenuButton>
             </>
           )}
 

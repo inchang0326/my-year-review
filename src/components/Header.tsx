@@ -43,7 +43,6 @@ export const Header: React.FC<HeaderProps> = ({
             style={{
               fontSize: "2rem",
               fontWeight: "700",
-              marginBottom: "0.5rem",
               background:
                 "linear-gradient(135deg, var(--indigo), var(--emerald))",
               WebkitBackgroundClip: "text",

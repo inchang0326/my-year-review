@@ -118,15 +118,19 @@ export const App: React.FC = () => {
     setShowJoinModal(true);
   };
 
+  // ✅ 버그 수정: 협업모드 참여 시 JoinModal에서 입력한 닉네임을 사용
   const handleJoin = async (
     code: string,
-    ignoredNicknameFromModal: string
+    nicknameFromModal: string
   ): Promise<boolean> => {
-    // JoinModal이 닉네임을 받더라도, UX는 “설정의 닉네임”을 우선 사용하도록 고정
-    // (필요하면 JoinModal의 닉네임 입력 UI 자체를 제거하는 방향도 가능)
     clearError();
 
-    const ok = await joinSession(code, nickname);
+    const v = nicknameFromModal.trim() || "익명";
+
+    // 설정 드로어/작성자명도 즉시 일치
+    setNickname(v);
+
+    const ok = await joinSession(code, v);
     if (ok) {
       setInviteCode(code);
       setShowJoinModal(false);

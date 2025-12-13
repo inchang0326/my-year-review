@@ -1,5 +1,6 @@
 export const CURRENT_YEAR = new Date().getFullYear();
 export const YEARS_RANGE = 5;
+
 export const AVAILABLE_YEARS = Array.from(
   { length: YEARS_RANGE + 1 },
   (_, index) => CURRENT_YEAR - YEARS_RANGE + index
@@ -13,7 +14,7 @@ export const CATEGORY_CONFIG = {
     emoji: "🚀",
   },
   stop: {
-    title: "멈출 것",
+    title: "멈플 것",
     description: "그만두거나 줄이고 싶은 습관, 활동",
     color: "rose",
     emoji: "🛑",
@@ -29,4 +30,5 @@ export const CATEGORY_CONFIG = {
 export const STORAGE_KEYS = {
   REVIEWS: "year_end_reviews",
   THEME: "theme_preference",
+  SOLO_NICKNAME: "solo_nickname",
 } as const;

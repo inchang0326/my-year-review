@@ -39,6 +39,8 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
         display: "flex",
         flexDirection: "column",
         gap: "1rem",
+        width: "100%",
+        boxSizing: "border-box",
       }}
     >
       <div
@@ -75,7 +77,6 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
 
       <form
         onSubmit={handleSubmit}
-        className="review-form"
         style={{
           display: "flex",
           flexDirection: "column",
@@ -147,8 +148,8 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
               key={item.id}
               style={{
                 display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
+                flexDirection: "column",
+                gap: "0.25rem",
                 padding: "0.75rem",
                 borderRadius: "0.5rem",
                 backgroundColor: `var(--${config.color}-light)`,
@@ -156,34 +157,68 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
                 wordBreak: "break-word",
               }}
             >
-              <span
+              {/* 첫 줄: 내용 + 삭제 버튼 */}
+              <div
                 style={{
-                  flex: 1,
-                  color: "var(--text-primary)",
-                  fontSize: "0.95rem",
-                  paddingRight: "0.5rem",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: "0.5rem",
                 }}
               >
-                {item.content}
-              </span>
-              <button
-                onClick={() => onDeleteItem(item.id)}
+                <span
+                  style={{
+                    flex: 1,
+                    color: "var(--text-primary)",
+                    fontSize: "0.95rem",
+                    paddingRight: "0.5rem",
+                  }}
+                >
+                  {item.content}
+                </span>
+                <button
+                  onClick={() => onDeleteItem(item.id)}
+                  style={{
+                    padding: "0.25rem 0.5rem",
+                    borderRadius: "0.25rem",
+                    border: "none",
+                    backgroundColor: "transparent",
+                    color: "var(--text-secondary)",
+                    fontSize: "1.5rem",
+                    lineHeight: "1",
+                    transition: "color 0.2s",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                  }}
+                  aria-label="삭제"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* 두 번째 줄: 작성자 정보 */}
+              <div
                 style={{
-                  padding: "0.25rem 0.5rem",
-                  borderRadius: "0.25rem",
-                  border: "none",
-                  backgroundColor: "transparent",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  fontSize: "0.75rem",
                   color: "var(--text-secondary)",
-                  fontSize: "1.5rem",
-                  lineHeight: "1",
-                  transition: "color 0.2s",
-                  cursor: "pointer",
-                  flexShrink: 0,
+                  opacity: 0.7,
+                  paddingTop: "0.25rem",
+                  borderTop: "1px solid rgba(0, 0, 0, 0.05)",
                 }}
-                aria-label="삭제"
               >
-                ×
-              </button>
+                <span>📝 {item.createdBy || "익명"}</span>
+                <span>
+                  {new Date(item.createdAt).toLocaleString("ko-KR", {
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
             </div>
           ))
         )}

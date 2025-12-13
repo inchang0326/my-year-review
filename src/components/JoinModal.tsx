@@ -20,7 +20,7 @@ export const JoinModal: React.FC<JoinModalProps> = ({
 
   const handleJoin = async () => {
     if (!inviteCode.trim()) {
-      setError("초대 코드를 입력해주세요");
+      setError("초대코드를 입력해주세요");
       return;
     }
 
@@ -91,7 +91,7 @@ export const JoinModal: React.FC<JoinModalProps> = ({
               fontWeight: "500",
             }}
           >
-            초대 코드
+            초대코드
           </label>
           <input
             type="text"

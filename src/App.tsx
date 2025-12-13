@@ -2,11 +2,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Header } from "./components/Header";
 import { YearSelector } from "./components/YearSelector";
 import { ReviewBoard } from "./components/ReviewBoard";
-import { ThemeToggle } from "./components/ThemeToggle";
 import { InviteModal } from "./components/InviteModal";
 import { JoinModal } from "./components/JoinModal";
 import { CollaboratorsList } from "./components/CollaboratorsList";
-import { NicknameModal } from "./components/NicknameModal";
+import { SettingsDrawer } from "./components/SettingsDrawer";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { useFirebase } from "./hooks/useFirebase";
 import type { ReviewItem, ReviewCategory, YearReview, Theme } from "./types";
@@ -16,19 +15,18 @@ import "./styles/globals.css";
 export const App: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState<number>(CURRENT_YEAR);
 
-  // 개인 모드
+  // 개인 모드(로컬)
   const [reviews, setReviews] = useLocalStorage<YearReview[]>(
     STORAGE_KEYS.REVIEWS,
     []
   );
   const [theme, setTheme] = useLocalStorage<Theme>(STORAGE_KEYS.THEME, "light");
-  const [soloNickname, setSoloNickname] = useLocalStorage<string>(
-    STORAGE_KEYS.SOLO_NICKNAME,
-    "익명 사용자"
-  );
 
-  // 협업 모드에서 사용할 “이번 세션 닉네임”
-  const [collabNickname, setCollabNickname] = useState<string | null>(null);
+  // 닉네임(단일 UX): 개인 작성자명 + 협업 참여자명으로 같이 사용
+  const [nickname, setNickname] = useLocalStorage<string>(
+    STORAGE_KEYS.SOLO_NICKNAME,
+    "익명"
+  );
 
   const {
     user,
@@ -43,72 +41,90 @@ export const App: React.FC = () => {
     deleteItem,
     leaveSession,
     deleteSession,
+    updateMyCollaboratorName,
   } = useFirebase();
 
-  const [showNicknameModal, setShowNicknameModal] = useState(false);
+  // UI
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const isCollabActive = !!session;
 
-  // 테마
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
-  // 초대코드가 잡히면 모달 자동 오픈
+  // 초대코드 잡히면 모달 오픈
   useEffect(() => {
     if (inviteCode) setShowInviteModal(true);
   }, [inviteCode]);
 
-  // 현재 아이템: 개인/협업 엄격 분리
   const currentItems: ReviewItem[] = useMemo(() => {
     if (session) return session.items || [];
     const yr = reviews.find((r) => r.year === selectedYear);
     return yr?.items || [];
   }, [reviews, selectedYear, session]);
 
-  // 협업 작성자 이름: collabNickname 우선, 없으면 세션에서 내 collaborator 이름 fallback
-  const myNameFromSession = useMemo(() => {
-    if (!user?.userId) return null;
-    return collaborators.find((c) => c.userId === user.userId)?.name ?? null;
-  }, [collaborators, user?.userId]);
-
-  const effectiveCollabName = useMemo(() => {
-    return (
-      collabNickname?.trim() ||
-      myNameFromSession?.trim() ||
-      "익명 사용자"
-    ).trim();
-  }, [collabNickname, myNameFromSession]);
-
   const handleToggleTheme = () =>
     setTheme((p) => (p === "light" ? "dark" : "light"));
 
-  // 협업 시작 버튼 -> 닉네임 먼저
-  const handleStartCollab = () => {
-    clearError();
-    setShowNicknameModal(true);
+  // 닉네임 확인(설정에서)
+  const handleConfirmNickname = async (next: string) => {
+    const v = next.trim() || "익명";
+    setNickname(v);
+
+    // 협업 중이면 참여자명도 즉시 업데이트
+    if (session?.id) {
+      await updateMyCollaboratorName(session.id, v);
+    }
   };
 
-  // 닉네임 확정 -> 세션 생성 -> 초대코드 모달
-  const handleNicknameConfirm = async (nickname: string) => {
+  const handleSelectSoloMode = async () => {
     clearError();
-    setShowNicknameModal(false);
+    setShowSettings(false);
 
-    setCollabNickname(nickname);
+    if (!session?.id) return;
+
+    const isLast = collaborators.length <= 1;
+    if (isLast) {
+      const shouldDelete = window.confirm(
+        "마지막 참여자입니다.\n해당 세션을 삭제하시겠습니까?"
+      );
+      await leaveSession(session.id);
+      if (shouldDelete) await deleteSession(session.id);
+    } else {
+      await leaveSession(session.id);
+    }
+
+    setInviteCode(null);
+    setShowInviteModal(false);
+  };
+
+  const handleCreateCollab = async () => {
+    clearError();
+    setShowSettings(false);
+
+    if (!authReady) return;
 
     const code = await createSession(selectedYear, nickname);
     if (code) setInviteCode(code);
   };
 
-  // 초대코드로 참여
+  const handleOpenJoin = () => {
+    clearError();
+    setShowSettings(false);
+    setShowJoinModal(true);
+  };
+
   const handleJoin = async (
     code: string,
-    nickname: string
+    ignoredNicknameFromModal: string
   ): Promise<boolean> => {
+    // JoinModal이 닉네임을 받더라도, UX는 “설정의 닉네임”을 우선 사용하도록 고정
+    // (필요하면 JoinModal의 닉네임 입력 UI 자체를 제거하는 방향도 가능)
     clearError();
-    setCollabNickname(nickname);
 
     const ok = await joinSession(code, nickname);
     if (ok) {
@@ -118,33 +134,19 @@ export const App: React.FC = () => {
     return ok;
   };
 
-  // 나가기: 마지막 사용자면 삭제 confirm
-  const handleLeaveSession = async () => {
-    clearError();
-    if (!session?.id) return;
-
-    const isLast = collaborators.length <= 1;
-    if (isLast) {
-      const shouldDelete = window.confirm(
-        "마지막 참여자입니다.\n이 협업 세션을 삭제(파기)하시겠습니까?"
-      );
-
-      await leaveSession(session.id);
-      if (shouldDelete) await deleteSession(session.id);
-    } else {
-      await leaveSession(session.id);
-    }
-
-    // 협업 닉네임/코드 초기화 -> 개인 모드 복귀 시 개인 닉네임 사용
-    setCollabNickname(null);
-    setInviteCode(null);
-    setShowInviteModal(false);
+  const handleOpenInviteCode = () => {
+    setShowSettings(false);
+    setShowInviteModal(true);
   };
 
-  // 아이템 추가: 개인/협업 엄격 분리 + 협업에서는 협업 닉네임 사용
+  const handleLeaveSession = async () => {
+    setShowSettings(false);
+    await handleSelectSoloMode();
+  };
+
   const handleAddItem = async (category: ReviewCategory, content: string) => {
     if (session) {
-      await addItem(category, content, effectiveCollabName); // ✅ 개인 닉네임이 아니라 협업 닉네임 사용
+      await addItem(category, content, nickname);
       return;
     }
 
@@ -153,15 +155,18 @@ export const App: React.FC = () => {
       category,
       content,
       createdAt: Date.now(),
-      createdBy: soloNickname,
+      createdBy: nickname,
     };
 
     setReviews((prev) => {
       const idx = prev.findIndex((r) => r.year === selectedYear);
       if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = { ...next[idx], items: [...next[idx].items, newItem] };
-        return next;
+        const nextArr = [...prev];
+        nextArr[idx] = {
+          ...nextArr[idx],
+          items: [...nextArr[idx].items, newItem],
+        };
+        return nextArr;
       }
       return [...prev, { year: selectedYear, items: [newItem] }];
     });
@@ -184,109 +189,45 @@ export const App: React.FC = () => {
 
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "var(--bg-primary)" }}>
-      <div
-        style={{
-          position: "fixed",
-          top: "1rem",
-          right: "1rem",
-          zIndex: 1000,
-          display: "flex",
-          gap: "0.75rem",
-          alignItems: "center",
-        }}
-      >
-        <ThemeToggle theme={theme} onToggle={handleToggleTheme} />
-        {!session && (
-          <button
-            onClick={() => setShowJoinModal(true)}
-            style={{
-              padding: "0.5rem 1rem",
-              borderRadius: "0.5rem",
-              border: "1px solid var(--border-color)",
-              backgroundColor: "var(--bg-card)",
-              color: "var(--text-primary)",
-              fontSize: "0.875rem",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-            title="초대 코드로 협업 시작"
-          >
-            👥 참여
-          </button>
-        )}
-      </div>
+      <Header
+        selectedYear={selectedYear}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
+        onOpenMenu={() => setShowSettings(true)}
+      />
 
-      <Header selectedYear={selectedYear} />
-
-      {/* 협업 모드 배너 + 나가기 버튼(이제 session이 채워져 정상 노출) */}
+      {/* 협업 중일 때만 참여자 표시(설명 문구 없이 최소 UI) */}
       {session && (
         <div
           style={{
-            backgroundColor: "var(--indigo)",
-            color: "#ffffff",
-            padding: "1rem",
-            textAlign: "center",
-            fontSize: "0.95rem",
-            fontWeight: 500,
-          }}
-        >
-          🔗 협업 모드 활성화 (초대 코드: <strong>{session.id}</strong>)
-          <button
-            onClick={() => setShowInviteModal(true)}
-            style={{
-              marginLeft: "1rem",
-              padding: "0.4rem 0.8rem",
-              borderRadius: "0.4rem",
-              border: "none",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-              color: "#ffffff",
-              cursor: "pointer",
-              fontSize: "0.875rem",
-              fontWeight: 700,
-            }}
-          >
-            📋 초대 코드
-          </button>
-          <button
-            onClick={handleLeaveSession}
-            style={{
-              marginLeft: "0.5rem",
-              padding: "0.4rem 0.8rem",
-              borderRadius: "0.4rem",
-              border: "none",
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-              color: "#ffffff",
-              cursor: "pointer",
-              fontSize: "0.875rem",
-              fontWeight: 700,
-            }}
-          >
-            🚪 나가기
-          </button>
-        </div>
-      )}
-
-      {/* 참여자 노출(이제 collaborators가 채워져 정상 노출) */}
-      {session && (
-        <div
-          style={{
-            padding: "1rem",
+            padding: "12px 16px",
             backgroundColor: "var(--bg-secondary)",
             borderBottom: "1px solid var(--border-color)",
           }}
         >
-          <p
+          <div
             style={{
-              margin: "0 0 0.75rem 0",
-              color: "var(--text-secondary)",
-              fontSize: "0.875rem",
-              fontWeight: 500,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "12px",
             }}
           >
-            참여자 {collaborators.length}명
-          </p>
+            <div
+              style={{
+                color: "var(--text-secondary)",
+                fontSize: "0.875rem",
+                fontWeight: 800,
+              }}
+            >
+              {collaborators.length}명
+            </div>
+          </div>
+
           {collaborators.length > 0 && (
-            <CollaboratorsList collaborators={collaborators} />
+            <div style={{ marginTop: "10px" }}>
+              <CollaboratorsList collaborators={collaborators} />
+            </div>
           )}
         </div>
       )}
@@ -295,65 +236,6 @@ export const App: React.FC = () => {
         selectedYear={selectedYear}
         onYearChange={setSelectedYear}
       />
-
-      {/* 개인 모드일 때만 협업 시작 섹션 노출 */}
-      {!session && (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "2rem",
-            backgroundColor: "var(--bg-secondary)",
-          }}
-        >
-          <p style={{ color: "var(--text-secondary)", marginBottom: "1rem" }}>
-            협업 세션 시작 전, 닉네임을 먼저 설정합니다.
-          </p>
-          <button
-            onClick={handleStartCollab}
-            disabled={!authReady}
-            style={{
-              padding: "0.75rem 1.5rem",
-              borderRadius: "0.5rem",
-              border: "none",
-              backgroundColor: "var(--indigo)",
-              color: "#ffffff",
-              fontSize: "1rem",
-              fontWeight: 700,
-              cursor: authReady ? "pointer" : "not-allowed",
-              opacity: authReady ? 1 : 0.6,
-            }}
-          >
-            🚀 협업 세션 시작
-          </button>
-
-          {/* 개인 닉네임 입력(개인 모드에만 영향) */}
-          <div
-            style={{
-              marginTop: "1rem",
-              color: "var(--text-secondary)",
-              fontSize: "0.875rem",
-            }}
-          >
-            <div style={{ marginBottom: "0.5rem" }}>개인 모드 닉네임</div>
-            <input
-              value={soloNickname === "익명 사용자" ? "" : soloNickname}
-              onChange={(e) =>
-                setSoloNickname(e.target.value.trim() || "익명 사용자")
-              }
-              placeholder="(개인 모드) 닉네임을 입력하세요"
-              style={{
-                width: "min(320px, 90%)",
-                padding: "10px 12px",
-                borderRadius: "10px",
-                border: "1px solid var(--border-color)",
-                backgroundColor: "var(--bg-card)",
-                color: "var(--text-primary)",
-                boxSizing: "border-box",
-              }}
-            />
-          </div>
-        </div>
-      )}
 
       <ReviewBoard
         items={currentItems}
@@ -367,26 +249,31 @@ export const App: React.FC = () => {
             position: "fixed",
             bottom: "1rem",
             left: "1rem",
+            right: "1rem",
             backgroundColor: "var(--rose)",
             color: "#ffffff",
             padding: "1rem",
-            borderRadius: "0.5rem",
+            borderRadius: "12px",
             fontSize: "0.875rem",
-            zIndex: 6000,
+            zIndex: 8000,
           }}
         >
           ❌ {error}
         </div>
       )}
 
-      <NicknameModal
-        isOpen={showNicknameModal}
-        defaultValue={soloNickname}
-        title="협업 닉네임 설정"
-        description="이번 협업 세션에서 사용할 닉네임을 입력해주세요."
-        confirmText="세션 만들기"
-        onConfirm={handleNicknameConfirm}
-        onClose={() => setShowNicknameModal(false)}
+      <SettingsDrawer
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        nickname={nickname}
+        onConfirmNickname={handleConfirmNickname}
+        isCollabActive={isCollabActive}
+        sessionId={session?.id}
+        onSelectSoloMode={handleSelectSoloMode}
+        onCreateCollab={handleCreateCollab}
+        onOpenJoin={handleOpenJoin}
+        onOpenInviteCode={handleOpenInviteCode}
+        onLeaveSession={handleLeaveSession}
       />
 
       <InviteModal

@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
-import { get, onValue, ref, remove, set } from "firebase/database";
+import { get, onValue, ref, remove, set, update } from "firebase/database";
 import type { Unsubscribe } from "firebase/database";
 
 import { auth, database } from "../utils/firebase";
@@ -15,8 +15,9 @@ import type {
 function normalizeToArray<T>(value: unknown): T[] {
   if (!value) return [];
   if (Array.isArray(value)) return value.filter(Boolean) as T[];
-  if (typeof value === "object")
+  if (typeof value === "object") {
     return Object.values(value as Record<string, T>).filter(Boolean);
+  }
   return [];
 }
 
@@ -41,17 +42,13 @@ function normalizeSession(
   if (!raw || typeof raw !== "object") return null;
   const data = raw as Record<string, unknown>;
 
-  // items/collaborators는 DB에서 map으로 내려올 수 있으므로 배열로 정규화
-  const items = normalizeToArray<ReviewItem>(data.items);
-  const collaborators = normalizeToArray<Collaborator>(data.collaborators);
-
   return {
     id: (data.id as string) || sessionId,
     creatorId: (data.creatorId as string) || "",
     creatorName: (data.creatorName as string) || "",
     year: (data.year as number) || new Date().getFullYear(),
-    items,
-    collaborators,
+    items: normalizeToArray<ReviewItem>(data.items),
+    collaborators: normalizeToArray<Collaborator>(data.collaborators),
     createdAt: (data.createdAt as number) || Date.now(),
     expiresAt: (data.expiresAt as number) || 0,
   };
@@ -61,14 +58,11 @@ export const useFirebase = () => {
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
 
-  // ✅ “현재 참여 중인 세션 ID”
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-
   const [session, setSession] = useState<CollaborationSession | null>(null);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // 1) 익명 로그인 준비
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (fbUser) => {
       try {
@@ -90,7 +84,7 @@ export const useFirebase = () => {
 
   const clearError = useCallback(() => setError(null), []);
 
-  // ✅ 2) activeSessionId가 정해지면 자동으로 세션을 구독해서 session 상태를 채움
+  // activeSessionId가 정해지면 자동 구독
   useEffect(() => {
     if (!activeSessionId) {
       setSession(null);
@@ -99,7 +93,6 @@ export const useFirebase = () => {
     }
 
     const sessionRef = ref(database, `sessions/${activeSessionId}`);
-
     const unsub: Unsubscribe = onValue(
       sessionRef,
       (snapshot) => {
@@ -108,7 +101,6 @@ export const useFirebase = () => {
           setCollaborators([]);
           return;
         }
-
         const normalized = normalizeSession(snapshot.val(), activeSessionId);
         setSession(normalized);
         setCollaborators(normalized?.collaborators ?? []);
@@ -122,13 +114,6 @@ export const useFirebase = () => {
     return () => unsub();
   }, [activeSessionId]);
 
-  // (옵션) 외부에서 수동 리스닝이 필요하면 제공
-  const listenToSession = useCallback((sessionId: string): Unsubscribe => {
-    setActiveSessionId(sessionId);
-    // 위 useEffect가 실구독을 담당하므로, 여기서는 dummy unsubscribe 반환
-    return () => {};
-  }, []);
-
   const createSession = useCallback(
     async (year: number, nickname: string): Promise<string | null> => {
       if (!authReady || !user) {
@@ -136,11 +121,7 @@ export const useFirebase = () => {
         return null;
       }
 
-      const name = nickname.trim();
-      if (!name) {
-        setError("닉네임을 입력해주세요.");
-        return null;
-      }
+      const name = nickname.trim() || "익명";
 
       try {
         const code = Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -163,17 +144,13 @@ export const useFirebase = () => {
           expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
         };
 
-        // ✅ 저장: items/collaborators는 map 형태로(충돌/업데이트 안정)
         await set(ref(database, `sessions/${code}`), {
           ...sessionData,
           items: {},
           collaborators: { [me.userId]: me },
         });
 
-        // ✅ “세션 시작”의 핵심: activeSessionId 설정 -> 자동 리스너가 session 상태를 채움
         setActiveSessionId(code);
-
-        console.log("✅ Session created:", code);
         return code;
       } catch (e) {
         console.error("❌ createSession error:", e);
@@ -192,15 +169,7 @@ export const useFirebase = () => {
       }
 
       const code = inviteCode.trim().toUpperCase();
-      const name = nickname.trim();
-      if (!code) {
-        setError("초대 코드를 입력해주세요.");
-        return false;
-      }
-      if (!name) {
-        setError("닉네임을 입력해주세요.");
-        return false;
-      }
+      const name = nickname.trim() || "익명";
 
       try {
         const sessionRef = ref(database, `sessions/${code}`);
@@ -222,10 +191,7 @@ export const useFirebase = () => {
           ref(database, `sessions/${code}/collaborators/${me.userId}`),
           me
         );
-
-        // ✅ 참여 즉시 activeSessionId 설정 -> 자동 리스너가 session/collaborators 채움
         setActiveSessionId(code);
-
         return true;
       } catch (e) {
         console.error("❌ joinSession error:", e);
@@ -240,7 +206,7 @@ export const useFirebase = () => {
     async (category: ReviewCategory, content: string, createdBy: string) => {
       if (!session) return;
 
-      const name = createdBy.trim() || "익명 사용자";
+      const name = createdBy.trim() || "익명";
 
       const newItem: ReviewItem = {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
@@ -289,7 +255,6 @@ export const useFirebase = () => {
         console.error("❌ leaveSession error:", e);
         setError("세션 나가기 실패");
       } finally {
-        // ✅ “모드 분리”를 위해 무조건 협업 상태 종료
         setActiveSessionId(null);
       }
     },
@@ -308,26 +273,43 @@ export const useFirebase = () => {
     []
   );
 
+  // ✅ 닉네임 실시간 변경(세션 참여 중일 때)
+  const updateMyCollaboratorName = useCallback(
+    async (sessionId: string, nickname: string): Promise<void> => {
+      if (!user) return;
+
+      const name = nickname.trim() || "익명";
+
+      try {
+        // name만 부분 업데이트(기존 joinedAt/color 유지)
+        await update(
+          ref(database, `sessions/${sessionId}/collaborators/${user.userId}`),
+          {
+            name,
+          }
+        );
+      } catch (e) {
+        console.error("❌ updateMyCollaboratorName error:", e);
+        setError("닉네임 변경 실패");
+      }
+    },
+    [user]
+  );
+
   return {
     user,
     authReady,
-
-    // 협업 상태
     activeSessionId,
     session,
     collaborators,
-
-    // 에러
     error,
     clearError,
-
-    // actions
     createSession,
     joinSession,
-    listenToSession, // (옵션) 유지
     addItem,
     deleteItem,
     leaveSession,
     deleteSession,
+    updateMyCollaboratorName, // ✅ 추가
   };
 };

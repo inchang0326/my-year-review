@@ -18,7 +18,7 @@ export type Theme = "light" | "dark";
 // ========== 신규: 협업 관련 타입 ==========
 
 export interface CollaborationSession {
-  id: string; // 초대 코드
+  id: string; // 초대코드
   creatorId: string;
   creatorName: string;
   year: number;

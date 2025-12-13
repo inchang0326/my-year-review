@@ -15,7 +15,7 @@ export const NicknameModal: React.FC<NicknameModalProps> = ({
   isOpen,
   defaultValue,
   title = "닉네임 설정",
-  description = "협업 세션에서 사용할 닉네임을 입력해주세요.",
+  description = "협업세션에서 사용할 닉네임을 입력해주세요.",
   confirmText = "계속",
   isBusy = false,
   onConfirm,

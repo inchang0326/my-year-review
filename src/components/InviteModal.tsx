@@ -52,7 +52,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
           padding: "20px",
         }}
       >
-        <h2 style={{ margin: 0, color: "var(--text-primary)" }}>초대 코드</h2>
+        <h2 style={{ margin: 0, color: "var(--text-primary)" }}>초대코드</h2>
 
         <p style={{ marginTop: "8px", color: "var(--text-secondary)" }}>
           아래 코드를 공유하면 동일 보드에 함께 편집할 수 있습니다.

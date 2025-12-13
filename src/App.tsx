@@ -22,14 +22,12 @@ export const App: React.FC = () => {
   );
   const [theme, setTheme] = useLocalStorage<Theme>(STORAGE_KEYS.THEME, "light");
 
-  // 닉네임(단일 UX): 개인 작성자명 + 협업 참여자명으로 같이 사용
   const [nickname, setNickname] = useLocalStorage<string>(
     STORAGE_KEYS.SOLO_NICKNAME,
     "익명"
   );
 
   const {
-    user,
     authReady,
     session,
     collaborators,
@@ -118,7 +116,6 @@ export const App: React.FC = () => {
     setShowJoinModal(true);
   };
 
-  // ✅ 버그 수정: 협업모드 참여 시 JoinModal에서 입력한 닉네임을 사용
   const handleJoin = async (code: string): Promise<boolean> => {
     clearError();
 

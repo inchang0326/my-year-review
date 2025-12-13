@@ -105,20 +105,6 @@ export const JoinModal: React.FC<JoinModalProps> = ({
           />
         </div>
 
-        <div style={{ marginBottom: "1rem" }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "0.5rem",
-              color: "var(--text-secondary)",
-              fontSize: "0.875rem",
-              fontWeight: "500",
-            }}
-          >
-            닉네임
-          </label>
-        </div>
-
         {error && (
           <p
             style={{

@@ -39,6 +39,7 @@
 <img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/41bd2106-800a-476f-a31f-85420d71a13b" />
 
 - 협업모드 참여하기 (공유 링크 통해 다이렉트 참여 가능함)
+<img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/02729150-d518-48a9-85ea-bda322029458" />
 
 ---
 

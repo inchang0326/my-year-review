@@ -7,7 +7,7 @@
 - React.js + TypeScript on Vite
 - PWA(Progressive Web App) build
 - Kakaotalk share link integration
-- Vercel: static web resources hosting
+- Vercel: static web resources hosting & Continuous Deployment
 - Firebase: Pub/Sub Realtime Database
 
 ## Features
@@ -29,20 +29,20 @@
 ## UI/UX
 
 - 홈 화면
-  <img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/e06b6fc5-9a45-45b2-acb0-891feba376e4" />
-  <img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/3a51afe4-dea3-46bd-96a7-8d060eaeff3a" />
+<img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/e06b6fc5-9a45-45b2-acb0-891feba376e4" />
+<img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/3a51afe4-dea3-46bd-96a7-8d060eaeff3a" />
 
 - 개인모드 메뉴
-  <img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/71e0875f-da99-4cef-b37a-06d94baffceb" />
+<img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/71e0875f-da99-4cef-b37a-06d94baffceb" />
 
 - 협업모드 메뉴
-  <img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/15941c6e-233c-4216-a00a-118438573ccc" />
+<img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/15941c6e-233c-4216-a00a-118438573ccc" />
 
 - 협업모드 만들기
-  <img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/41bd2106-800a-476f-a31f-85420d71a13b" />
+<img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/41bd2106-800a-476f-a31f-85420d71a13b" />
 
 - 협업모드 참여하기 (공유 링크 통해 다이렉트 참여 가능함)
-  <img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/02729150-d518-48a9-85ea-bda322029458" />
+<img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/02729150-d518-48a9-85ea-bda322029458" />
 
 ---
 
@@ -129,11 +129,12 @@ sessions/
 }
 ```
 
-### 5) Kakao Developers 등록 방법
+### 5) Kakao Developers 연계 방법
 
 1. https://developers.kakao.com/console/app → 앱 탭 → **앱 생성**
 2. 좌측 앱 메뉴 → 플랫폼 키 메뉴 → JavaScript 키 선택
 3. 해당 JavaScript 키 취득 및 JavaScript SDK 도메인 등록
+4. 앱 내 설치 및 사용 (참고: https://developers.kakao.com/docs/latest/ko/javascript/getting-started)
 
 ### 6) DEV 실행
 

@@ -93,6 +93,34 @@ export const InviteModal: React.FC<InviteModalProps> = ({
     window.setTimeout(() => setCopied(false), 1500);
   };
 
+  const styles: Record<string, React.CSSProperties> = {
+    shareRow: {
+      display: "grid",
+      gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+      gap: "8px",
+      width: "100%",
+    },
+    shareBtn: {
+      width: "100%",
+      height: 44, // 버튼 높이 고정하면 3개가 정렬이 깔끔합니다.
+      borderRadius: "10px",
+      border: "1px solid var(--border-color)",
+      backgroundColor: "var(--bg-card)",
+      color: "var(--text-primary)",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 0,
+    },
+    icon: {
+      width: 22,
+      height: 22,
+      objectFit: "contain", // 아이콘 비율 유지 [web:165]
+      display: "block",
+    },
+  };
+
   return (
     <div
       role="dialog"
@@ -162,67 +190,54 @@ export const InviteModal: React.FC<InviteModalProps> = ({
           </button>
         </div>
 
-        <div style={{ display: "grid", gap: "8px", marginTop: "12px" }}>
-          <button
-            type="button"
-            onClick={handleCopyLink}
-            style={{
-              width: "100%",
-              padding: "12px",
-              borderRadius: "10px",
-              border: "1px solid var(--border-color)",
-              backgroundColor: "var(--bg-card)",
-              color: "var(--text-primary)",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            {linkCopied ? "초대링크 복사됨" : "초대링크 복사"}
-          </button>
-
+        <div style={{ marginTop: "12px" }}>
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(72px, 1fr))",
               gap: "8px",
+              width: "100%",
             }}
           >
+            {/* 링크 복사 */}
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              title={linkCopied ? "초대링크 복사됨" : "초대링크 복사"}
+              aria-label={linkCopied ? "초대링크 복사됨" : "초대링크 복사"}
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: "10px",
+                border: "1px solid var(--border-color)",
+                backgroundColor: "var(--bg-card)",
+                color: "var(--text-primary)",
+                fontWeight: 800,
+                cursor: "pointer",
+              }}
+            >
+              {linkCopied ? "🔗✓" : "🔗"}
+            </button>
+
+            {/* 카카오톡 공유 */}
             <button
               type="button"
               onClick={handleShareKakao}
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "10px",
-                border: "1px solid var(--border-color)",
-                backgroundColor: "var(--bg-card)",
-                color: "var(--text-primary)",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
+              style={styles.shareBtn}
             >
-              카카오톡 공유
+              <img src="/kakaotalk.svg" alt="카카오톡" style={styles.icon} />
             </button>
 
+            {/* 문자 공유 */}
             <button
               type="button"
               onClick={handleShareSms}
-              style={{
-                width: "100%",
-                padding: "12px",
-                borderRadius: "10px",
-                border: "1px solid var(--border-color)",
-                backgroundColor: "var(--bg-card)",
-                color: "var(--text-primary)",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
+              style={styles.shareBtn}
             >
-              문자 공유
+              <img src="/SMS.png" alt="문자" style={styles.icon} />
             </button>
           </div>
         </div>
-
         <button
           type="button"
           onClick={onClose}

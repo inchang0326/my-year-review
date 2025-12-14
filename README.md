@@ -26,12 +26,12 @@
 ## UI/UX
 
 - 홈 화면
-![홈_밤_화면](https://github.com/user-attachments/assets/e06b6fc5-9a45-45b2-acb0-891feba376e4)
-![홈_낮_화면](https://github.com/user-attachments/assets/3a51afe4-dea3-46bd-96a7-8d060eaeff3a)
+<img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/e06b6fc5-9a45-45b2-acb0-891feba376e4" />
+<img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/3a51afe4-dea3-46bd-96a7-8d060eaeff3a" />
 - 개인모드 메뉴
-<img width="1080" height="2400" alt="image" src="https://github.com/user-attachments/assets/71e0875f-da99-4cef-b37a-06d94baffceb" />
+<img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/71e0875f-da99-4cef-b37a-06d94baffceb" />
 - 협업모드 메뉴
-<img width="1080" height="2400" alt="image" src="https://github.com/user-attachments/assets/15941c6e-233c-4216-a00a-118438573ccc" />
+<img width="320" height="800" alt="image" src="https://github.com/user-attachments/assets/15941c6e-233c-4216-a00a-118438573ccc" />
 - 협업모드 만들기
 <img width="1080" height="2400" alt="image" src="https://github.com/user-attachments/assets/41bd2106-800a-476f-a31f-85420d71a13b" />
 - 협업모드 참여하기 (공유 링크 통해 다이렉트 참여 가능함)

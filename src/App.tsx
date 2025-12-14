@@ -48,7 +48,21 @@ export const App: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
 
   const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [inviteFromLink, setInviteFromLink] = useState<string | null>(null);
+
   const isCollabActive = !!session;
+
+  function readInviteFromUrl(): string | null {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("invite");
+    return code ? code.trim().toUpperCase() : null;
+  }
+
+  function clearInviteFromUrl() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("invite");
+    window.history.replaceState({}, "", url.toString());
+  }
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -58,6 +72,27 @@ export const App: React.FC = () => {
   useEffect(() => {
     if (inviteCode) setShowInviteModal(true);
   }, [inviteCode]);
+
+  // 1) 최초 진입 시 invite 파라미터를 잡아둠
+  useEffect(() => {
+    const code = readInviteFromUrl();
+    if (!code) return;
+
+    setInviteFromLink(code);
+    clearInviteFromUrl();
+  }, []);
+
+  // 2) authReady가 된 시점에 자동으로 join 시도 (곧장 협업모드 진입)
+  useEffect(() => {
+    if (!authReady) return;
+    if (!inviteFromLink) return;
+
+    // nickname은 항상 있으므로(기본 "익명") 즉시 join 시도
+    handleJoin(inviteFromLink).then((ok) => {
+      if (!ok) setShowJoinModal(true);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authReady, inviteFromLink]);
 
   const currentItems: ReviewItem[] = useMemo(() => {
     if (session) return session.items || [];
@@ -278,6 +313,7 @@ export const App: React.FC = () => {
 
       <JoinModal
         isOpen={showJoinModal}
+        initialInviteCode={inviteFromLink ?? undefined}
         onJoin={handleJoin}
         onClose={() => setShowJoinModal(false)}
       />

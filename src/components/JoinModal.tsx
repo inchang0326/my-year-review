@@ -1,19 +1,29 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface JoinModalProps {
   isOpen: boolean;
+  initialInviteCode?: string;
   onJoin: (inviteCode: string) => Promise<boolean>;
   onClose: () => void;
 }
 
 export const JoinModal: React.FC<JoinModalProps> = ({
   isOpen,
+  initialInviteCode,
   onJoin,
   onClose,
 }) => {
   const [inviteCode, setInviteCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (initialInviteCode && initialInviteCode.trim()) {
+      setInviteCode(initialInviteCode.trim().toUpperCase());
+      setError(null);
+    }
+  }, [isOpen, initialInviteCode]);
 
   if (!isOpen) return null;
 

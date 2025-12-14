@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 
 interface InviteModalProps {
   isOpen: boolean;
@@ -14,6 +14,75 @@ export const InviteModal: React.FC<InviteModalProps> = ({
   onCopySuccess,
 }) => {
   const [copied, setCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  const inviteUrl = useMemo(() => {
+    // 배포 경로가 /가 아닐 수도 있으니, 현재 URL 기반으로 invite만 붙입니다.
+    if (!inviteCode) return "";
+    const url = new URL(window.location.href);
+    url.searchParams.set("invite", inviteCode);
+    return url.toString();
+  }, [inviteCode]);
+
+  const handleCopyLink = async () => {
+    if (!inviteCode) return;
+    await navigator.clipboard.writeText(inviteUrl);
+    setLinkCopied(true);
+    onCopySuccess?.();
+    window.setTimeout(() => setLinkCopied(false), 1500);
+  };
+
+  const ensureKakaoInitialized = (jsKey: string): boolean => {
+    const w = window as any;
+    if (!w.Kakao) return false;
+
+    if (!w.Kakao.isInitialized()) {
+      w.Kakao.init(jsKey);
+    }
+    return !!w.Kakao.isInitialized();
+  };
+
+  const handleShareKakao = () => {
+    if (!inviteCode) return;
+
+    const jsKey = import.meta.env.VITE_KAKAO_JS_KEY as string | undefined;
+    if (!jsKey) {
+      alert("VITE_KAKAO_JS_KEY가 설정되어 있지 않습니다.");
+      return;
+    }
+
+    const ok = ensureKakaoInitialized(jsKey);
+    if (!ok) {
+      alert(
+        "카카오 SDK 로드/초기화에 실패했습니다. index.html SDK 로드 여부를 확인하세요."
+      );
+      return;
+    }
+
+    // Kakao.Share.sendDefault()로 텍스트 템플릿 공유 [web:86]
+    (window as any).Kakao.Share.sendDefault({
+      objectType: "text",
+      text: `Year-End Review 협업 초대\n\n초대코드: ${inviteCode}\n\n참여 링크: ${inviteUrl}`,
+      link: {
+        mobileWebUrl: inviteUrl,
+        webUrl: inviteUrl,
+      },
+      buttonTitle: "참여하기",
+    });
+  };
+
+  const handleShareSms = () => {
+    if (!inviteCode) return;
+
+    const message = `회고 보드 협업 초대\n초대코드: ${inviteCode}\n링크: ${inviteUrl}`;
+
+    const encoded = encodeURIComponent(message);
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+    // iOS는 ';body=', Android는 '?body=' 형태가 더 잘 동작하는 케이스가 있어 분기 [web:37]
+    const smsUrl = isIOS ? `sms:&body=${encoded}` : `sms:?body=${encoded}`;
+    window.location.href = smsUrl;
+  };
 
   if (!isOpen || !inviteCode) return null;
 
@@ -91,6 +160,67 @@ export const InviteModal: React.FC<InviteModalProps> = ({
           >
             {copied ? "복사됨" : "복사"}
           </button>
+        </div>
+
+        <div style={{ display: "grid", gap: "8px", marginTop: "12px" }}>
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            style={{
+              width: "100%",
+              padding: "12px",
+              borderRadius: "10px",
+              border: "1px solid var(--border-color)",
+              backgroundColor: "var(--bg-card)",
+              color: "var(--text-primary)",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            {linkCopied ? "초대링크 복사됨" : "초대링크 복사"}
+          </button>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+              gap: "8px",
+            }}
+          >
+            <button
+              type="button"
+              onClick={handleShareKakao}
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: "10px",
+                border: "1px solid var(--border-color)",
+                backgroundColor: "var(--bg-card)",
+                color: "var(--text-primary)",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              카카오톡 공유
+            </button>
+
+            <button
+              type="button"
+              onClick={handleShareSms}
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: "10px",
+                border: "1px solid var(--border-color)",
+                backgroundColor: "var(--bg-card)",
+                color: "var(--text-primary)",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              문자 공유
+            </button>
+          </div>
         </div>
 
         <button

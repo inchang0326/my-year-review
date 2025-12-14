@@ -4,14 +4,14 @@ import { getAuth } from "firebase/auth";
 
 // Firebase 설정 - 본인 Firebase Console에서 복사
 const firebaseConfig = {
-  apiKey: "AIzaSyBPamNXhk6psKK-nwPcez7VLqAwLSgVFUk",
-  authDomain: "year-end-review-487f6.firebaseapp.com",
-  databaseURL: "https://year-end-review-487f6-default-rtdb.firebaseio.com",
-  projectId: "year-end-review-487f6",
-  storageBucket: "year-end-review-487f6.firebasestorage.app",
-  messagingSenderId: "217477499118",
-  appId: "1:217477499118:web:e2c4825484c4394e4f4bff",
-  measurementId: "G-VY1F7580WH",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Firebase 초기화

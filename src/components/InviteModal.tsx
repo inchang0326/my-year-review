@@ -13,7 +13,6 @@ export const InviteModal: React.FC<InviteModalProps> = ({
   onClose,
   onCopySuccess,
 }) => {
-  const [copied, setCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
 
   const inviteUrl = useMemo(() => {
@@ -88,9 +87,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(inviteCode);
-    setCopied(true);
     onCopySuccess?.(); // ✅ 있으면 호출
-    window.setTimeout(() => setCopied(false), 1500);
   };
 
   const styles: Record<string, React.CSSProperties> = {
@@ -156,9 +153,8 @@ export const InviteModal: React.FC<InviteModalProps> = ({
         </p>
 
         <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
-          <input
-            readOnly
-            value={inviteCode}
+          <button
+            onClick={handleCopy}
             style={{
               flex: 1,
               padding: "12px",
@@ -171,22 +167,8 @@ export const InviteModal: React.FC<InviteModalProps> = ({
               textAlign: "center",
               boxSizing: "border-box",
             }}
-          />
-          <button
-            type="button"
-            onClick={handleCopy}
-            style={{
-              padding: "12px 14px",
-              borderRadius: "10px",
-              border: "none",
-              backgroundColor: "var(--indigo)",
-              color: "#fff",
-              fontWeight: 700,
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-            }}
           >
-            {copied ? "복사됨" : "복사"}
+            {inviteCode}
           </button>
         </div>
 
@@ -216,7 +198,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
                 cursor: "pointer",
               }}
             >
-              {linkCopied ? "🔗✓" : "🔗"}
+              {linkCopied ? "🔗" : "🔗"}
             </button>
 
             {/* 카카오톡 공유 */}

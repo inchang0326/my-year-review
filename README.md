@@ -42,6 +42,7 @@ npm install
 ### 2) 환경변수 설정
 
 프로젝트 루트에 `.env.local` 파일을 만들고 Firebase와 Kakao Developers 설정을 입력합니다.
+
 (운영 환경은 웹 호스팅 설정 내 환경 변수를 사용합니다.)
 
 예시:

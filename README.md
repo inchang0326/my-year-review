@@ -7,7 +7,7 @@
 - React.js + TypeScript on Vite
 - PWA(Progressive Web App) build
 - Kakaotalk share link integration
-- Vercel: static web resources hosting & Continuous Deployment
+- Vercel: Static web resources hosting & CI/CD
 - Firebase: Pub/Sub Realtime Database
 
 ## Features
